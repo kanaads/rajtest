@@ -6,6 +6,7 @@ import googlesearch as gs
 from bs4 import BeautifulSoup
 from googlesearch import search
 import requests
+import math
 
 app = Flask(__name__)
 
@@ -25,7 +26,6 @@ def search():
     similarity_results = []
     dict_res={}
 
-
     # Loop through each search result and extract content
     for result in search_results:
         try:
@@ -41,18 +41,17 @@ def search():
                 None, input_text.lower(), content.lower()).ratio()
 
             # Add the similarity and source of the content to the list
-            similarity_results.append(f"Similarity with {result}: {similarity}\n")
-            dict_res[result]=similarity
+            similarity_results.append({'url': result, 'similarity': similarity})
+            dict_res[result]=math.ceil(similarity*100)
+            
         except Exception as e:
             # Handle any errors that occur during the search or extraction of content
             print(f"Error in processing {result}: {e}")
         
 
-    # Join the similarity results list into a single string with line breaks
-    output_text = '\n'.join(similarity_results)
-    
-    # Return a response with the similarity results
-    return dict_res
+    # Render a template to display the similarity results
+    return render_template('results.html', similarity_results=similarity_results)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
